@@ -65,6 +65,37 @@ module.exports = async function () {
     return result.rows[0];
   }
 
+  //Update Account Type
+  async function updateAccountType(postData, accountId) {
+    let sqlQuery =  `UPDATE account SET account_type_id = $1
+    WHERE account_id = $2`;
+    let params = [     
+      postData,
+      accountId.account_id       
+    ];    
+    console.log('params postdata: ' + params)
+    const result = await client.query(sqlQuery, params);   
+    console.log("PARAMS: " + params);
+    console.log("UPDATED ACCOUNT TYPE: " + result);
+    return result;
+  }
+
+  async function updateSource(sourceId, postData) {
+    let sqlQuery = `UPDATE source SET name = $1, address = $2, phone_number = $3
+      WHERE source_id = $4`;
+    let params = [
+      postData.name,
+      postData.address,
+      postData.phoneNumber,
+      sourceId,
+    ];
+
+    const result = await client.query(sqlQuery, params);
+
+    return result.rows;
+  }
+
+
   async function updateEntryById(entryId, postData, callback) {
     const editDate = new Date();
     let sqlQuery = `UPDATE entry SET item_id = $1, source_id = $2, weight = $3, created = $4, last_edit = $5
@@ -87,6 +118,7 @@ module.exports = async function () {
       }
     });
   }
+  
 
   // get list of cx connected sources
   async function getSources(authId) {
@@ -299,6 +331,7 @@ module.exports = async function () {
     addEntries,
     findAccount,
     addAccount,
+    updateAccountType,
     updateSource,
     updateItem,
     addItem,
