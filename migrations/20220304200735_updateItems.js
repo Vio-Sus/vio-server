@@ -46,7 +46,7 @@ exports.up = function (knex) {
       (
         cx_source_id SERIAL PRIMARY KEY NOT NULL,
         source_id int REFERENCES source(source_id) NOT NULL,
-        cx_account_id int REFERENCES account(account_id) NOT NULL        
+        cx_account_id int REFERENCES account(account_id) NOT NULL      
       )
   `),
     knex.raw(`
@@ -78,6 +78,7 @@ exports.up = function (knex) {
  */
 exports.down = function (knex) {
   return Promise.all([
+    knex.schema.dropTableIfExists('access_code'),
     knex.schema.dropTableIfExists('account_item'),
     knex.schema.dropTableIfExists('entry'),
     knex.schema.dropTableIfExists('cx_source'),
