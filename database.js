@@ -136,6 +136,7 @@ module.exports = async function () {
   // add new source for logged in user
   async function addSource(newSource, accountId) {
     const valuesData = sourceSqlValues(newSource);
+    console.log(valuesData)
     const sqlQuery = `WITH new_source AS (
       INSERT INTO source(${valuesData.columnNames})
       VALUES (${valuesData.numString})
