@@ -72,7 +72,6 @@ module.exports = function (database) {
     }
   });
 
-
   /** Change account type **/
   app.put('/api/profile/', async (req, res) => {             
     const theData = req.body.data;

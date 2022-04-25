@@ -72,11 +72,9 @@ module.exports = async function () {
     let params = [     
       postData,
       accountId.account_id       
-    ];    
-    console.log('params postdata: ' + params)
+    ];       
     const result = await client.query(sqlQuery, params);   
-    console.log("PARAMS: " + params);
-    console.log("UPDATED ACCOUNT TYPE: " + result);
+    console.log("PARAMS: " + params);    
     return result;
   }
 
