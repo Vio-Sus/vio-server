@@ -8,6 +8,7 @@ const jwt_decode = require('jwt-decode');
 
 const authConfig = require('./auth');
 const { generateDataset, filterEntriesBySource } = require('./chartHelpers');
+const { json } = require('body-parser');
 
 module.exports = function (database) {
   const app = express();
@@ -67,6 +68,26 @@ module.exports = function (database) {
       // user is logged in with auth0
       res.send({ user: { ...req.oidc?.user } });
     } else {
+      res.status(500).send({ error });
+    }
+  });
+
+
+  /** Change account type **/
+  app.put('/api/profile/', async (req, res) => {             
+    const theData = req.body.data;
+    const authId = req.oidc?.user?.sub;
+    const user = await database.findAccount(authId);    
+    let s = JSON.stringify(theData);   
+    let postData = parseInt(s[30])       
+    console.log("POST DATA: " +  JSON.stringify(postData));
+    try {
+      await database.updateAccountType(postData, user);
+      res.send({
+        msg: 'account_type_id has been updated',
+      });
+    } catch (error) {
+      console.error(error);
       res.status(500).send({ error });
     }
   });

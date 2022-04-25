@@ -2,7 +2,7 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.up = function (knex) {
+ exports.up = function (knex) {
   return Promise.all([
     knex.schema.createTable('account_type', function (t) {
       t.increments('account_type_id').primary();
@@ -38,7 +38,8 @@ exports.up = function (knex) {
         name VARCHAR(255) NOT NULL,
         address VARCHAR(255) NOT NULL,
         phone_number VARCHAR(255),
-        account_id int references account(account_id)
+        account_id int references account(account_id),
+        email VARCHAR(255) UNIQUE NOT NULL 
       )
   `),
     knex.raw(`
@@ -46,7 +47,7 @@ exports.up = function (knex) {
       (
         cx_source_id SERIAL PRIMARY KEY NOT NULL,
         source_id int REFERENCES source(source_id) NOT NULL,
-        cx_account_id int REFERENCES account(account_id) NOT NULL        
+        cx_account_id int REFERENCES account(account_id) NOT NULL      
       )
   `),
     knex.raw(`
@@ -78,6 +79,7 @@ exports.up = function (knex) {
  */
 exports.down = function (knex) {
   return Promise.all([
+    knex.schema.dropTableIfExists('access_code'),
     knex.schema.dropTableIfExists('account_item'),
     knex.schema.dropTableIfExists('entry'),
     knex.schema.dropTableIfExists('cx_source'),
