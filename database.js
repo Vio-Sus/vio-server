@@ -81,12 +81,13 @@ module.exports = async function () {
   }
 
   async function updateSource(sourceId, postData) {
-    let sqlQuery = `UPDATE source SET name = $1, address = $2, phone_number = $3
-      WHERE source_id = $4`;
+    let sqlQuery = `UPDATE source SET name = $1, address = $2, phone_number = $3, email = $4
+      WHERE source_id = $5`;
     let params = [
       postData.name,
       postData.address,
       postData.phoneNumber,
+      postData.email,
       sourceId,
     ];
 
@@ -123,7 +124,7 @@ module.exports = async function () {
   // get list of cx connected sources
   async function getSources(authId) {
     console.log('AAAAAUTH ', authId);
-    const sqlQuery = `SELECT cx_source.source_id, name, address, phone_number FROM cx_source
+    const sqlQuery = `SELECT cx_source.source_id, name, address, phone_number, email FROM cx_source
     JOIN source ON cx_source.source_id = source.source_id
     JOIN account ON cx_source.cx_account_id = account.account_id
     WHERE account.auth0_id = $1;`;
@@ -151,12 +152,13 @@ module.exports = async function () {
   }
 
   async function updateSource(sourceId, postData) {
-    let sqlQuery = `UPDATE source SET name = $1, address = $2, phone_number = $3
-      WHERE source_id = $4`;
+    let sqlQuery = `UPDATE source SET name = $1, address = $2, phone_number = $3, email = $4
+      WHERE source_id = $5`;
     let params = [
       postData.name,
       postData.address,
       postData.phoneNumber,
+      postData.email,
       sourceId,
     ];
 
