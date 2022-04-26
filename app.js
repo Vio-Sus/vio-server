@@ -114,21 +114,21 @@ module.exports = function (database) {
   app.post('/api/sources/check-phone', async (req, res) => {
     try {
       const sqlObj = await database.checkSourcePhone(req.body.phoneNumber);
-      res.send(sqlObj)
+      res.send(sqlObj);
     } catch (err) {
       console.log(err);
     }
   });
 
-    // Check for duplicate emails
-    app.post('/api/sources/check-email', async (req, res) => {
-      try {
-        const sqlObj = await database.checkSourceEmail(req.body.email);
-        res.send(sqlObj)
-      } catch (err) {
-        console.log(err);
-      }
-    });
+  // Check for duplicate emails
+  app.post('/api/sources/check-email', async (req, res) => {
+    try {
+      const sqlObj = await database.checkSourceEmail(req.body.email);
+      res.send(sqlObj);
+    } catch (err) {
+      console.log(err);
+    }
+  });
 
   // post request to add a new source to this Cx account
   app.post('/api/sources', async (req, res) => {
