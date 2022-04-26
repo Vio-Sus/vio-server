@@ -37,7 +37,7 @@
         source_id SERIAL PRIMARY KEY NOT NULL,
         name VARCHAR(255) NOT NULL,
         address VARCHAR(255) NOT NULL,
-        phone_number VARCHAR(255),
+        phone_number VARCHAR(255) UNIQUE,
         account_id int references account(account_id),
         email VARCHAR(255) UNIQUE NOT NULL 
       )

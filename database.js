@@ -67,16 +67,13 @@ module.exports = async function () {
 
   //Update Account Type
   async function updateAccountType(postData, accountId) {
-    let sqlQuery =  `UPDATE account SET account_type_id = $1
+    let sqlQuery = `UPDATE account SET account_type_id = $1
     WHERE account_id = $2`;
-    let params = [     
-      postData,
-      accountId.account_id       
-    ];    
-    console.log('params postdata: ' + params)
-    const result = await client.query(sqlQuery, params);   
-    console.log("PARAMS: " + params);
-    console.log("UPDATED ACCOUNT TYPE: " + result);
+    let params = [postData, accountId.account_id];
+    console.log('params postdata: ' + params);
+    const result = await client.query(sqlQuery, params);
+    console.log('PARAMS: ' + params);
+    console.log('UPDATED ACCOUNT TYPE: ' + result);
     return result;
   }
 
@@ -95,7 +92,6 @@ module.exports = async function () {
 
     return result.rows;
   }
-
 
   async function updateEntryById(entryId, postData, callback) {
     const editDate = new Date();
@@ -119,7 +115,20 @@ module.exports = async function () {
       }
     });
   }
-  
+
+  // check source email for duplicates
+  async function checkSourceEmail(sourceEmail) {
+    const sqlQuery = `SELECT COUNT(email) FROM source WHERE email = $1`;
+    const result = await client.query(sqlQuery, [sourceEmail]);
+    return result.rows[0];
+  }
+
+    // check source phone number for duplicates
+    async function checkSourcePhone(sourcePhone) {
+      const sqlQuery = `SELECT COUNT(phone_number) FROM source WHERE phone_number = $1`;
+      const result = await client.query(sqlQuery, [sourcePhone]);
+      return result.rows[0];
+    }
 
   // get list of cx connected sources
   async function getSources(authId) {
@@ -136,7 +145,7 @@ module.exports = async function () {
   // add new source for logged in user
   async function addSource(newSource, accountId) {
     const valuesData = sourceSqlValues(newSource);
-    console.log(valuesData)
+    console.log(valuesData);
     const sqlQuery = `WITH new_source AS (
       INSERT INTO source(${valuesData.columnNames})
       VALUES (${valuesData.numString})
@@ -148,7 +157,6 @@ module.exports = async function () {
       accountId,
       ...valuesData.values,
     ]);
-
     return result.rows;
   }
 
@@ -325,6 +333,8 @@ module.exports = async function () {
     testQuery,
     getEntryById,
     getSources,
+    checkSourceEmail,
+    checkSourcePhone,
     addSource,
     getItems,
     getEntriesByDateRange,
