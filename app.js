@@ -72,15 +72,14 @@ module.exports = function (database) {
     }
   });
 
-
   /** Change account type **/
-  app.put('/api/profile/', async (req, res) => {             
+  app.put('/api/profile/', async (req, res) => {
     const theData = req.body.data;
     const authId = req.oidc?.user?.sub;
-    const user = await database.findAccount(authId);    
-    let s = JSON.stringify(theData);   
-    let postData = parseInt(s[30])       
-    console.log("POST DATA: " +  JSON.stringify(postData));
+    const user = await database.findAccount(authId);
+    let s = JSON.stringify(theData);
+    let postData = parseInt(s[30]);
+    console.log('POST DATA: ' + JSON.stringify(postData));
     try {
       await database.updateAccountType(postData, user);
       res.send({
@@ -158,14 +157,21 @@ module.exports = function (database) {
     }
   });
 
-  app.put('/api/items/:id', async (req, res) => {
+  app.put('/api/items/:id', checkAuth, async (req, res) => {
     const itemId = req.params.id;
+    const authId = req.oidc?.user?.sub;
     const itemEdit = req.body.data;
     try {
-      await database.updateItem(itemId, itemEdit);
-      res.send({
-        msg: 'item has been updated',
-      });
+      const account = await database.findAccount(authId);
+      const oldItem = await database.getItem(account.account_id, itemEdit);
+      if (oldItem) {
+        res.status(500).send({ msg: 'The item already exists' });
+      } else {
+        await database.updateItem(itemId, itemEdit);
+        res.send({
+          msg: 'item has been updated',
+        });
+      }
     } catch (error) {
       console.error(error);
       res.status(500).send({ error });
@@ -180,11 +186,17 @@ module.exports = function (database) {
     console.log('authId: ', authId);
     try {
       const account = await database.findAccount(authId);
+      const oldItem = await database.getItem(account.account_id, newItem);
+      console.log('OLDITEM', oldItem);
       console.log('ACCCOCUNT ID', account);
-      await database.addItem(newItem, account.account_id);
-      res.send({
-        msg: 'New Item added successfully',
-      });
+      if (oldItem) {
+        res.status(500).send({ msg: 'The item already exists' });
+      } else {
+        await database.addItem(newItem, account.account_id);
+        res.send({
+          msg: 'New Item added successfully',
+        });
+      }
     } catch (error) {
       console.error(error);
       res.status(500).send({ error });
@@ -305,7 +317,8 @@ module.exports = function (database) {
   /** Graph routes **/
   app.get(
     '/api/graph/line/:startDate/:endDate',
-    checkAuth, async (req, res) => {
+    checkAuth,
+    async (req, res) => {
       console.log('get graph routes is called :)');
       const authId = req.oidc?.user?.sub;
       // const authId = 'auth0|62070daf94fb2700687ca3b3'; // pinky

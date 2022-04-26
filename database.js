@@ -178,6 +178,16 @@ module.exports = async function () {
     return result.rows;
   }
 
+  async function getItem(authId, itemName) {
+    let sqlQuery = `SELECT name, item_id FROM item
+     
+      WHERE account_id = $1 and name = $2;`;
+    //   WHERE account_item.account_id = $1;`;
+    // client.query(sqlQuery, [accountId], (err, result) => {
+    const result = await client.query(sqlQuery, [authId, itemName.name]);
+    return result.rows[0];
+  }
+
   async function updateItem(itemId, postData) {
     let sqlQuery = `UPDATE item SET name = $1
       WHERE item_id = $2`;
@@ -340,5 +350,6 @@ module.exports = async function () {
     addItem,
     getTotalWeights,
     getGraphDataset,
+    getItem,
   };
 };
