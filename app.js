@@ -137,14 +137,36 @@ module.exports = function (database) {
     console.log('newSource: ', newSource);
     try {
       const account = await database.findAccount(authId);
-      //console.log('ACCCOCUNT ID', account);
-      await database.addSource(newSource, account.account_id);
-      res.send({
-        msg: 'New source added successfully',
-      });
+      let sources = await database.getAllSources();
+      let foundSource = sources.find((item) => item.email == newSource.email);
+      console.log(sources);
+      console.log(foundSource);
+      // check the source in the source table
+      if(foundSource){
+        // check the source in the cx_source table
+        let sourcesOfCollectors = await database.getSources(authId);
+        let foundSourceOfCollectors = sourcesOfCollectors.find((item) => item.source_id == foundSource.source_id)
+        if(foundSourceOfCollectors){
+          res.status(500).send({error: "it already exists" });
+        }else{
+          let test = await database.addSourceOfCollector(foundSource.source_id, account.account_id);
+          console.log( test);
+          res.send({
+            msg: 'New source of this collector added successfully',
+          });
+        }
+        
+      }else{
+        let source= await database.addNewSource(newSource);
+      //  console.log('sourceTest: '+ JSON.stringify(sourceTest));
+        await database.addSourceOfCollector(source.source_id, account.account_id);
+        res.send({
+          msg: 'New source of this collector added successfully',
+        });
+      }
     } catch (error) {
-      console.error(error.detail);
-      res.status(500).send(err);
+      console.error("error.detail: " + error.detail);
+      res.status(500).send(error.detail);
     }
   });
 

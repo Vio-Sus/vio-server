@@ -142,23 +142,41 @@ module.exports = async function () {
     return result.rows;
   }
 
-  // add new source for logged in user
-  async function addSource(newSource, accountId) {
-    const valuesData = sourceSqlValues(newSource);
-    console.log(valuesData);
-    const sqlQuery = `WITH new_source AS (
-      INSERT INTO source(${valuesData.columnNames})
-      VALUES (${valuesData.numString})
-      RETURNING source_id)
-      INSERT INTO cx_source (source_id, cx_account_id)
-      SELECT source_id, $1
-      FROM new_source;`;
-    const result = await client.query(sqlQuery, [
-      accountId,
-      ...valuesData.values,
-    ]);
+   // get list of all the sources in source table
+   async function getAllSources() {
+    const sqlQuery = `SELECT * from source;`;
+    const result = await client.query(sqlQuery);
+
     return result.rows;
   }
+
+
+  // add new source in cx_source for logged in user
+  async function addSourceOfCollector(sourceId, accountId) {
+    const sqlQuery = `INSERT INTO cx_source (source_id, cx_account_id)
+    VALUES ($1, $2);`;
+    const result = await client.query(sqlQuery, [sourceId, accountId]);
+    return result.rows;
+  }
+
+   // add new source in source table
+   async function addNewSource(postData) {
+    let sqlQuery = `INSERT INTO source (name, address, phone_number, email )
+    VALUES ($1, $2, $3, $4)
+    RETURNING source_id
+    `;
+    let params = [
+      postData.name,
+      postData.address,
+      postData.phoneNumber,
+      postData.email,
+    ];
+    const result = await client.query(sqlQuery, params);
+
+    return result.rows[0];
+ 
+  }
+
 
   async function updateSource(sourceId, postData) {
     let sqlQuery = `UPDATE source SET name = $1, address = $2, phone_number = $3, email = $4
@@ -335,7 +353,7 @@ module.exports = async function () {
     getSources,
     checkSourceEmail,
     checkSourcePhone,
-    addSource,
+    addSourceOfCollector,
     getItems,
     getEntriesByDateRange,
     getListOfEntries,
@@ -350,5 +368,7 @@ module.exports = async function () {
     addItem,
     getTotalWeights,
     getGraphDataset,
+    addNewSource,
+    getAllSources,
   };
 };
