@@ -142,30 +142,37 @@ module.exports = function (database) {
       console.log(sources);
       console.log(foundSource);
       // check the source in the source table
-      if(foundSource){
+      if (foundSource) {
         // check the source in the cx_source table
         let sourcesOfCollectors = await database.getSources(authId);
-        let foundSourceOfCollectors = sourcesOfCollectors.find((item) => item.source_id == foundSource.source_id)
-        if(foundSourceOfCollectors){
-          res.status(500).send({error: "it already exists" });
-        }else{
-          let test = await database.addSourceOfCollector(foundSource.source_id, account.account_id);
-          console.log( test);
+        let foundSourceOfCollectors = sourcesOfCollectors.find(
+          (item) => item.source_id == foundSource.source_id
+        );
+        if (foundSourceOfCollectors) {
+          res.send({error: "Source already exists; Try again"});
+        } else {
+          let test = await database.addSourceOfCollector(
+            foundSource.source_id,
+            account.account_id
+          );
+          console.log(test);
           res.send({
             msg: 'New source of this collector added successfully',
           });
         }
-        
-      }else{
-        let source= await database.addNewSource(newSource);
-      //  console.log('sourceTest: '+ JSON.stringify(sourceTest));
-        await database.addSourceOfCollector(source.source_id, account.account_id);
+      } else {
+        let source = await database.addNewSource(newSource);
+        //  console.log('sourceTest: '+ JSON.stringify(sourceTest));
+        await database.addSourceOfCollector(
+          source.source_id,
+          account.account_id
+        );
         res.send({
           msg: 'New source of this collector added successfully',
         });
       }
     } catch (error) {
-      console.error("error.detail: " + error.detail);
+      console.error('error.detail: ' + error.detail);
       res.status(500).send(error.detail);
     }
   });
