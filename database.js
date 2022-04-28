@@ -65,6 +65,34 @@ module.exports = async function () {
     return result.rows[0];
   }
 
+  //Update Account Type
+  async function updateAccountType(postData, accountId) {
+    let sqlQuery = `UPDATE account SET account_type_id = $1
+    WHERE account_id = $2`;
+    let params = [postData, accountId.account_id];
+    console.log('params postdata: ' + params);
+    const result = await client.query(sqlQuery, params);
+    console.log('PARAMS: ' + params);
+    console.log('UPDATED ACCOUNT TYPE: ' + result);
+    return result;
+  }
+
+  async function updateSource(sourceId, postData) {
+    let sqlQuery = `UPDATE source SET name = $1, address = $2, phone_number = $3, email = $4
+      WHERE source_id = $5`;
+    let params = [
+      postData.name,
+      postData.address,
+      postData.phoneNumber,
+      postData.email,
+      sourceId,
+    ];
+
+    const result = await client.query(sqlQuery, params);
+
+    return result.rows;
+  }
+
   async function updateEntryById(entryId, postData, callback) {
     const editDate = new Date();
     let sqlQuery = `UPDATE entry SET item_id = $1, source_id = $2, weight = $3, created = $4, last_edit = $5
@@ -88,10 +116,24 @@ module.exports = async function () {
     });
   }
 
+  // check source email for duplicates
+  async function checkSourceEmail(sourceEmail) {
+    const sqlQuery = `SELECT COUNT(email) FROM source WHERE email = $1`;
+    const result = await client.query(sqlQuery, [sourceEmail]);
+    return result.rows[0];
+  }
+
+    // check source phone number for duplicates
+    async function checkSourcePhone(sourcePhone) {
+      const sqlQuery = `SELECT COUNT(phone_number) FROM source WHERE phone_number = $1`;
+      const result = await client.query(sqlQuery, [sourcePhone]);
+      return result.rows[0];
+    }
+
   // get list of cx connected sources
   async function getSources(authId) {
     console.log('AAAAAUTH ', authId);
-    const sqlQuery = `SELECT cx_source.source_id, name, address, phone_number FROM cx_source
+    const sqlQuery = `SELECT cx_source.source_id, name, address, phone_number, source.email FROM cx_source
     JOIN source ON cx_source.source_id = source.source_id
     JOIN account ON cx_source.cx_account_id = account.account_id
     WHERE account.auth0_id = $1;`;
@@ -101,57 +143,48 @@ module.exports = async function () {
   }
 
 
-  // get list of cx connected sources
-  async function getSource(authId) {
-    console.log('AAAAAUTH ', authId);
-    const sqlQuery = `SELECT cx_source.source_id, name, address, phone_number FROM cx_source
-    JOIN source ON cx_source.source_id = source.source_id
-    JOIN account ON cx_source.cx_account_id = account.account_id
-    WHERE account.auth0_id = $1;`;
-    const result = await client.query(sqlQuery, [authId]);
-
+   // get list of all the sources in source table
+   async function getAllSources() {
+    const sqlQuery = `SELECT * from source;`;
+    const result = await client.query(sqlQuery);
     return result.rows;
   }
 
-  // get list of cx connected to the specified source
-  // async function getSource(authId) {
-  //   console.log('AAAAAUTH ', authId);
-  //   const sqlQuery = `SELECT cx_account_id FROM cx_source
-  //   JOIN account ON cx_account_id = account.account_id
-  //   WHERE source_id = currect source id
-  //   AND account.auth0_id = $1;`;
-  //   const result = await client.query(sqlQuery, [authId]);
-
-  //   return result.rows;
-  // }
-
-
-
-  // add new source for logged in user
-  async function addSource(newSource, accountId) {
-    const valuesData = sourceSqlValues(newSource);
-    const sqlQuery = `WITH new_source AS (
-      INSERT INTO source(${valuesData.columnNames})
-      VALUES (${valuesData.numString})
-      RETURNING source_id)
-      INSERT INTO cx_source (source_id, cx_account_id)
-      SELECT source_id, $1
-      FROM new_source;`;
-    const result = await client.query(sqlQuery, [
-      accountId,
-      ...valuesData.values,
-    ]);
-
+  // add new source in cx_source for logged in user
+  async function addSourceOfCollector(sourceId, accountId) {
+    const sqlQuery = `INSERT INTO cx_source (source_id, cx_account_id)
+    VALUES ($1, $2);`;
+    const result = await client.query(sqlQuery, [sourceId, accountId]);
     return result.rows;
   }
 
-  async function updateSource(sourceId, postData) {
-    let sqlQuery = `UPDATE source SET name = $1, address = $2, phone_number = $3
-      WHERE source_id = $4`;
+   // add new source in source table
+   async function addNewSource(postData) {
+    let sqlQuery = `INSERT INTO source (name, address, phone_number, email )
+    VALUES ($1, $2, $3, $4)
+    RETURNING source_id
+    `;
     let params = [
       postData.name,
       postData.address,
       postData.phoneNumber,
+      postData.email,
+    ];
+    const result = await client.query(sqlQuery, params);
+
+    return result.rows[0];
+ 
+  }
+
+
+  async function updateSource(sourceId, postData) {
+    let sqlQuery = `UPDATE source SET name = $1, address = $2, phone_number = $3, email = $4
+      WHERE source_id = $5`;
+    let params = [
+      postData.name,
+      postData.address,
+      postData.phoneNumber,
+      postData.email,
       sourceId,
     ];
 
@@ -333,8 +366,9 @@ module.exports = async function () {
     testQuery,
     getEntryById,
     getSources,
-    getSource,
-    addSource,
+    checkSourceEmail,
+    checkSourcePhone,
+    addSourceOfCollector,
     getItems,
     getEntriesByDateRange,
     getListOfEntries,
@@ -344,10 +378,13 @@ module.exports = async function () {
     addEntries,
     findAccount,
     addAccount,
+    updateAccountType,
     updateSource,
     updateItem,
     addItem,
     getTotalWeights,
     getGraphDataset,
+    addNewSource,
+    getAllSources,
   };
 };

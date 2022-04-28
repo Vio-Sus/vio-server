@@ -2,7 +2,7 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-exports.seed = function (knex) {
+ exports.seed = function (knex) {
   return knex('account_type')
     .insert([{ account_type: 'cx' }, { account_type: 'sx' }])
 
@@ -91,38 +91,44 @@ exports.seed = function (knex) {
         {
           name: 'Cafe 1',
           address: '123 ABC Street, Vancouver, BC',
-          phone_number: 6045555555,
+          phone_number: 6045555655,
           account_id: 1,
+          email: 'cafe1@gmail.com'
         },
         {
           name: 'Cafe 2',
-          address: '456 EFG Street, Vancouver, BC',
-          phone_number: 6040000000,
+          address: '222 EFG Street, Vancouver, BC',
+          phone_number: 6040060000,
           account_id: 1,
+          email: 'cafe2@gmail.com'
         },
         {
           name: 'Cafe 3',
-          address: '789 whatever street, van, bc',
+          address: '889 whatever street, van, bc',
           phone_number: null,
           account_id: 1,
+          email: 'cafe3@gmail.com'
         },
         {
           name: 'Coffee Shop 1',
-          address: '123 ABC Street, Vancouver, BC',
-          phone_number: 6045555555,
+          address: '433 ABC Street, Vancouver, BC',
+          phone_number: 6045565555,
           account_id: 3,
+          email: 'cafe4@gmail.com'
         },
         {
           name: 'Coffee Shop 2',
           address: '456 EFG Street, Vancouver, BC',
-          phone_number: 6040000000,
+          phone_number: 6040005000,
           account_id: 3,
+          email: 'cafe5@gmail.com'
         },
         {
           name: 'Coffee Shop 3',
           address: '789 whatever street, van, bc',
           phone_number: null,
           account_id: 3,
+          email: 'cafe6@gmail.com'
         },
       ]);
     })

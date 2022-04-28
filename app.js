@@ -8,6 +8,7 @@ const jwt_decode = require('jwt-decode');
 
 const authConfig = require('./auth');
 const { generateDataset, filterEntriesBySource } = require('./chartHelpers');
+const { json } = require('body-parser');
 
 module.exports = function (database) {
   const app = express();
@@ -71,6 +72,25 @@ module.exports = function (database) {
     }
   });
 
+  /** Change account type **/
+  app.put('/api/profile/', async (req, res) => {
+    const theData = req.body.data;
+    const authId = req.oidc?.user?.sub;
+    const user = await database.findAccount(authId);
+    let s = JSON.stringify(theData);
+    let postData = parseInt(s[30]);
+    console.log('POST DATA: ' + JSON.stringify(postData));
+    try {
+      await database.updateAccountType(postData, user);
+      res.send({
+        msg: 'account_type_id has been updated',
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ error });
+    }
+  });
+
   /** Source Routes **/
   // getting all the sources associated with the logged in user
 
@@ -82,7 +102,7 @@ module.exports = function (database) {
     try {
       let result = await database.getSources(authId);
       // await database.addEntries(entries, accountId);
-      console.log('resuuuuuuult', result);
+      //console.log('resuuuuuuult', result);
       res.send(result);
     } catch (error) {
       console.error(error);
@@ -90,19 +110,23 @@ module.exports = function (database) {
     }
   });
 
-  app.get('/api/source', async (req, res) => {
-    //change 1 to account id after we can log in
-
-    const authId = req.oidc?.user?.sub;
-
+  // Check for duplicate phone numbers
+  app.post('/api/sources/check-phone', async (req, res) => {
     try {
-      let result = await database.getSource(authId);
-      // await database.addEntries(entries, accountId);
-      console.log('resuuuuuuult', result);
-      res.send(result);
-    } catch (error) {
-      console.error(error);
-      res.status(500).send({ error });
+      const sqlObj = await database.checkSourcePhone(req.body.phoneNumber);
+      res.send(sqlObj);
+    } catch (err) {
+      console.log(err);
+    }
+  });
+
+  // Check for duplicate emails
+  app.post('/api/sources/check-email', async (req, res) => {
+    try {
+      const sqlObj = await database.checkSourceEmail(req.body.email);
+      res.send(sqlObj);
+    } catch (err) {
+      console.log(err);
     }
   });
 
@@ -113,14 +137,43 @@ module.exports = function (database) {
     console.log('newSource: ', newSource);
     try {
       const account = await database.findAccount(authId);
-      console.log('ACCCOCUNT ID', account);
-      await database.addSource(newSource, account.account_id);
-      res.send({
-        msg: 'New source added successfully',
-      });
+      let sources = await database.getAllSources();
+      let foundSource = sources.find((item) => item.email == newSource.email);
+      console.log(sources);
+      console.log(foundSource);
+      // check the source in the source table
+      if (foundSource) {
+        // check the source in the cx_source table
+        let sourcesOfCollectors = await database.getSources(authId);
+        let foundSourceOfCollectors = sourcesOfCollectors.find(
+          (item) => item.source_id == foundSource.source_id
+        );
+        if (foundSourceOfCollectors) {
+          res.send({error: "Source already exists; Try again"});
+        } else {
+          let test = await database.addSourceOfCollector(
+            foundSource.source_id,
+            account.account_id
+          );
+          console.log(test);
+          res.send({
+            msg: 'New source of this collector added successfully',
+          });
+        }
+      } else {
+        let source = await database.addNewSource(newSource);
+        //  console.log('sourceTest: '+ JSON.stringify(sourceTest));
+        await database.addSourceOfCollector(
+          source.source_id,
+          account.account_id
+        );
+        res.send({
+          msg: 'New source of this collector added successfully',
+        });
+      }
     } catch (error) {
-      console.error(error);
-      res.status(500).send({ error });
+      console.error('error.detail: ' + error.detail);
+      res.status(500).send(error.detail);
     }
   });
 
@@ -181,7 +234,7 @@ module.exports = function (database) {
         msg: 'New Item added successfully',
       });
     } catch (error) {
-      console.error(error);
+      console.error(error.detail);
       res.status(500).send({ error });
     }
   });
@@ -194,21 +247,6 @@ module.exports = function (database) {
 
     try {
       let result = await database.getListOfEntries(authId);
-      console.log('resuuuuuuult entries ', result);
-      res.send(result);
-    } catch (error) {
-      console.error(error);
-      res.status(500).send({ error });
-    }
-  });
-
-  // get the list of entries made by that account
-  app.get('/api/entriesSource', checkAuth, async (req, res) => {
-    //change 1 to account id after we can log in
-    const authId = req.oidc?.user?.sub;
-
-    try {
-      let result = await database.getListOfEntriesSource(authId);
       console.log('resuuuuuuult entries ', result);
       res.send(result);
     } catch (error) {
@@ -315,7 +353,8 @@ module.exports = function (database) {
   /** Graph routes **/
   app.get(
     '/api/graph/line/:startDate/:endDate',
-    checkAuth, async (req, res) => {
+    checkAuth,
+    async (req, res) => {
       console.log('get graph routes is called :)');
       const authId = req.oidc?.user?.sub;
       // const authId = 'auth0|62070daf94fb2700687ca3b3'; // pinky
