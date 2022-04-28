@@ -142,14 +142,56 @@ module.exports = async function () {
     return result.rows;
   }
 
+
    // get list of all the sources in source table
    async function getAllSources() {
     const sqlQuery = `SELECT * from source;`;
     const result = await client.query(sqlQuery);
-
     return result.rows;
   }
 
+  // get list of collector connected to the logged in sx
+  async function getSource(authId) {
+    console.log('AAAAAUTH ', authId);    
+    const sqlQuery = `SELECT email, account_id, account_type_id FROM account
+    WHERE account.auth0_id = $1;`;
+    const result = await client.query(sqlQuery, [authId]);
+    return result.rows[0];
+  }
+
+  // get collectors from source
+  async function getSourceCollectors(sourceId) {
+    const sqlQuery = `SELECT account.account_id, account.company, item.name AS item_name, item.item_id, entry_id, TO_CHAR(created :: DATE, 'yyyy-mm-dd') AS entry_date, weight AS entry_weight
+    FROM entry 
+    JOIN item ON entry.item_id = item.item_id
+    JOIN account ON entry.account_id = account.account_id
+    WHERE source_id = $1
+    ORDER by CREATED desc, entry_id desc;`;
+
+    const result = await client.query(sqlQuery, [sourceId]);
+    return result.rows;
+  }
+
+  async function getSourceIdFromEmail(email) {
+    const sqlQuery = `SELECT source_id from source where email = $1`;
+    const result = await client.query(sqlQuery, [email]);
+    return result.rows[0]
+  }
+  // get collectors from source date range
+  async function getSourceCollectorsByDateRange(startDate, endDate, sourceId) {
+    console.log(startDate, endDate)
+    const sqlQuery = `SELECT account.account_id, account.company, item.name AS item_name, item.item_id, entry_id, TO_CHAR(created :: DATE, 'yyyy-mm-dd') AS entry_date, weight AS entry_weight
+    FROM entry 
+    JOIN item ON entry.item_id = item.item_id
+    JOIN account ON entry.account_id = account.account_id
+    WHERE source_id = $1
+	  AND entry.created BETWEEN $2 AND $3
+    ORDER by CREATED desc, entry_id desc;`;
+
+    const result = await client.query(sqlQuery, [ sourceId, startDate, endDate ]);
+
+    return result.rows;
+  }
 
   // add new source in cx_source for logged in user
   async function addSourceOfCollector(sourceId, accountId) {
@@ -222,6 +264,22 @@ module.exports = async function () {
   }
 
   async function getListOfEntries(authId) {
+    let sqlQuery = `SELECT item.name AS item_name, item.item_id,
+    source.name AS source_name, source.source_id, entry_id,
+    TO_CHAR(created :: DATE, 'yyyy-mm-dd') AS entry_date, weight AS entry_weight
+    FROM entry
+    JOIN item ON entry.item_id = item.item_id
+    JOIN source ON entry.source_id = source.source_id
+    JOIN account ON entry.account_id = account.account_id
+    WHERE account.auth0_id = $1
+    ORDER by CREATED desc, entry_id desc;`;
+    const result = await client.query(sqlQuery, [authId]);
+
+    return result.rows;
+  }
+
+  // source view of its dashboard
+  async function getListOfEntriesSource(authId) {
     let sqlQuery = `SELECT item.name AS item_name, item.item_id,
     source.name AS source_name, source.source_id, entry_id,
     TO_CHAR(created :: DATE, 'yyyy-mm-dd') AS entry_date, weight AS entry_weight
@@ -354,9 +412,14 @@ module.exports = async function () {
     checkSourceEmail,
     checkSourcePhone,
     addSourceOfCollector,
+    getSource,
+    getSourceCollectors,
+    getSourceCollectorsByDateRange,
+    getSourceIdFromEmail,
     getItems,
     getEntriesByDateRange,
     getListOfEntries,
+    getListOfEntriesSource,
     deleteEntry,
     updateEntryById,
     addEntries,

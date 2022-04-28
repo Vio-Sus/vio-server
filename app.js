@@ -9,6 +9,7 @@ const jwt_decode = require('jwt-decode');
 const authConfig = require('./auth');
 const { generateDataset, filterEntriesBySource } = require('./chartHelpers');
 const { json } = require('body-parser');
+const { start } = require('repl');
 
 module.exports = function (database) {
   const app = express();
@@ -104,6 +105,55 @@ module.exports = function (database) {
       // await database.addEntries(entries, accountId);
       //console.log('resuuuuuuult', result);
       res.send(result);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ error });
+    }
+  });
+
+  // get collectors from source
+  app.get('/api/source', async (req, res) => {
+
+    const authId = req.oidc?.user?.sub;
+
+    try {
+      let result = await database.getSource(authId);
+      console.log(result)
+      if(result && result.account_type_id === 2) { //needs to be changed to 2 after migrating
+        const data = await database.getSourceIdFromEmail(result.email)
+        console.log(data)
+        const sourceCollectors = await  database.getSourceCollectors(data.source_id)
+        //console.log(sourceCollectors)
+        res.send(sourceCollectors);
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ error });
+    }
+  });
+
+  // get collectors from source
+  app.get('/api/entries/:startDate/:endDate', async (req, res) => {
+    //change 1 to account id after we can log in
+
+    const authId = req.oidc?.user?.sub;
+    const startDate = req.params.startDate;
+    const endDate = req.params.endDate;
+
+    try {
+      let result = await database.getSource(authId);
+      console.log(result)
+      const data = await database.getSourceIdFromEmail(result.email)
+      console.log(data.source_id)
+      if(result && result.account_type_id === 2) { //needs to be changed to 2 after migrating
+        let result = await database.getSourceCollectorsByDateRange(
+          startDate,
+          endDate,
+          data.source_id
+        );
+        console.log('resuuuuuuult entires dates ', result);
+        res.send(result);
+      }
     } catch (error) {
       console.error(error);
       res.status(500).send({ error });
