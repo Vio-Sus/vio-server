@@ -100,6 +100,33 @@ module.exports = async function () {
     return result.rows;
   }
 
+
+  // get list of cx connected sources
+  async function getSource(authId) {
+    console.log('AAAAAUTH ', authId);
+    const sqlQuery = `SELECT cx_source.source_id, name, address, phone_number FROM cx_source
+    JOIN source ON cx_source.source_id = source.source_id
+    JOIN account ON cx_source.cx_account_id = account.account_id
+    WHERE account.auth0_id = $1;`;
+    const result = await client.query(sqlQuery, [authId]);
+
+    return result.rows;
+  }
+
+  // get list of cx connected to the specified source
+  // async function getSource(authId) {
+  //   console.log('AAAAAUTH ', authId);
+  //   const sqlQuery = `SELECT cx_account_id FROM cx_source
+  //   JOIN account ON cx_account_id = account.account_id
+  //   WHERE source_id = currect source id
+  //   AND account.auth0_id = $1;`;
+  //   const result = await client.query(sqlQuery, [authId]);
+
+  //   return result.rows;
+  // }
+
+
+
   // add new source for logged in user
   async function addSource(newSource, accountId) {
     const valuesData = sourceSqlValues(newSource);
@@ -161,6 +188,22 @@ module.exports = async function () {
   }
 
   async function getListOfEntries(authId) {
+    let sqlQuery = `SELECT item.name AS item_name, item.item_id,
+    source.name AS source_name, source.source_id, entry_id,
+    TO_CHAR(created :: DATE, 'yyyy-mm-dd') AS entry_date, weight AS entry_weight
+    FROM entry
+    JOIN item ON entry.item_id = item.item_id
+    JOIN source ON entry.source_id = source.source_id
+    JOIN account ON entry.account_id = account.account_id
+    WHERE account.auth0_id = $1
+    ORDER by CREATED desc, entry_id desc;`;
+    const result = await client.query(sqlQuery, [authId]);
+
+    return result.rows;
+  }
+
+  // source view of its dashboard
+  async function getListOfEntriesSource(authId) {
     let sqlQuery = `SELECT item.name AS item_name, item.item_id,
     source.name AS source_name, source.source_id, entry_id,
     TO_CHAR(created :: DATE, 'yyyy-mm-dd') AS entry_date, weight AS entry_weight
@@ -290,10 +333,12 @@ module.exports = async function () {
     testQuery,
     getEntryById,
     getSources,
+    getSource,
     addSource,
     getItems,
     getEntriesByDateRange,
     getListOfEntries,
+    getListOfEntriesSource,
     deleteEntry,
     updateEntryById,
     addEntries,

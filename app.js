@@ -90,6 +90,22 @@ module.exports = function (database) {
     }
   });
 
+  app.get('/api/source', async (req, res) => {
+    //change 1 to account id after we can log in
+
+    const authId = req.oidc?.user?.sub;
+
+    try {
+      let result = await database.getSource(authId);
+      // await database.addEntries(entries, accountId);
+      console.log('resuuuuuuult', result);
+      res.send(result);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ error });
+    }
+  });
+
   // post request to add a new source to this Cx account
   app.post('/api/sources', async (req, res) => {
     const authId = req.oidc?.user?.sub;
@@ -178,6 +194,21 @@ module.exports = function (database) {
 
     try {
       let result = await database.getListOfEntries(authId);
+      console.log('resuuuuuuult entries ', result);
+      res.send(result);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ error });
+    }
+  });
+
+  // get the list of entries made by that account
+  app.get('/api/entriesSource', checkAuth, async (req, res) => {
+    //change 1 to account id after we can log in
+    const authId = req.oidc?.user?.sub;
+
+    try {
+      let result = await database.getListOfEntriesSource(authId);
       console.log('resuuuuuuult entries ', result);
       res.send(result);
     } catch (error) {
