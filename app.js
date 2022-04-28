@@ -112,7 +112,7 @@ module.exports = function (database) {
   });
 
   // get collectors from source
-  app.get('/api/source', async (req, res) => {
+  app.get('/api/sourceCollectors', async (req, res) => {
 
     const authId = req.oidc?.user?.sub;
 
@@ -133,7 +133,7 @@ module.exports = function (database) {
   });
 
   // get collectors from source
-  app.get('/api/entries/:startDate/:endDate', async (req, res) => {
+  app.get('/api/sourceCollectors/:startDate/:endDate', async (req, res) => {
     //change 1 to account id after we can log in
 
     const authId = req.oidc?.user?.sub;
