@@ -44,6 +44,15 @@
           account_type_id: 2,
           auth0_id: 'auth0|620c57e8cef4230069744708',
         },
+        {
+          given_name: 'adrian',
+          family_name: 'sieroslawski',
+          company: 'BCIT',
+          nickname: 'adrian',
+          email: 'adrian.sieroslawski@gmail.com',
+          account_type_id: 2,
+          auth0_id: 'auth0|62621507813c000069da4c37',
+        },
       ]);
     })
     .then(() => {
@@ -93,7 +102,7 @@
           address: '123 ABC Street, Vancouver, BC',
           phone_number: 6045555655,
           account_id: 1,
-          email: 'cafe1@gmail.com'
+          email: 'adrian.sieroslawski@gmail.com'
         },
         {
           name: 'Cafe 2',
