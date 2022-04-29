@@ -112,7 +112,7 @@ module.exports = function (database) {
   });
 
   // get collectors from source
-  app.get('/api/sourceCollectors', async (req, res) => {
+  app.get('/api/sourceCollectors', checkAuth, async (req, res) => {
 
     const authId = req.oidc?.user?.sub;
 
@@ -133,7 +133,7 @@ module.exports = function (database) {
   });
 
   // get collectors from source
-  app.get('/api/sourceCollectors/:startDate/:endDate', async (req, res) => {
+  app.get('/api/sourceCollectors/:startDate/:endDate',checkAuth, async (req, res) => {
     //change 1 to account id after we can log in
 
     const authId = req.oidc?.user?.sub;
@@ -181,7 +181,7 @@ module.exports = function (database) {
   });
 
   // post request to add a new source to this Cx account
-  app.post('/api/sources', async (req, res) => {
+  app.post('/api/sources', checkAuth, async (req, res) => {
     const authId = req.oidc?.user?.sub;
     const newSource = req.body.data;
     console.log('newSource: ', newSource);
