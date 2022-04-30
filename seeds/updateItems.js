@@ -36,6 +36,15 @@
           auth0_id: 'auth0|626090881ac86d006aaf2407',
         },
         {
+          given_name: 'adrian',
+          family_name: 'S',
+          company: 'Collector1',
+          nickname: 'adrian',
+          email: 'adrian.sieroslawski@gmail.com',
+          account_type_id: 1,
+          auth0_id: 'auth0|62621507813c000069da4c37',
+        },
+        {
           given_name: 'Source',
           family_name: 'Ranger',
           company: 'PowPow',
