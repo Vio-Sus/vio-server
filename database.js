@@ -180,7 +180,7 @@ module.exports = async function () {
   // get collectors from source date range
   async function getSourceCollectorsByDateRange(startDate, endDate, sourceId) {
     console.log(startDate, endDate)
-    const sqlQuery = `SELECT account.account_id, account.company, item.name AS item_name, item.item_id, entry_id, TO_CHAR(created :: DATE, 'yyyy-mm-dd') AS entry_date, weight AS entry_weight
+    const sqlQuery = `SELECT account.account_id, account.email, account.company, item.name AS item_name, item.item_id, entry_id, TO_CHAR(created :: DATE, 'yyyy-mm-dd') AS entry_date, weight AS entry_weight
     FROM entry 
     JOIN item ON entry.item_id = item.item_id
     JOIN account ON entry.account_id = account.account_id
