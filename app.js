@@ -122,8 +122,8 @@ module.exports = function (database) {
       if(result && result.account_type_id === 2) { //needs to be changed to 2 after migrating
         const data = await database.getSourceIdFromEmail(result.email)
         console.log(data)
-        const sourceCollectors = await  database.getSourceCollectors(data.source_id)
-        //console.log(sourceCollectors)
+        const sourceCollectors = await database.getSourceCollectors(data.source_id)
+        // console.log("collectors " + sourceCollectors)
         res.send(sourceCollectors);
       }
     } catch (error) {
