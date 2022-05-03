@@ -357,7 +357,7 @@ module.exports = async function () {
 
   async function getSourceGraphDataset(startDate, endDate, sourceId) {
     let sqlQuery = `
-    SELECT item.name AS item_name, account.company AS collector_name,
+    SELECT account.account_id, account.company AS collector_name, item.name AS item_name, 
     TO_CHAR(created :: DATE, 'yyyy-mm-dd) AS date, SUM(weight) AS total_weight FROM entry
     JOIN item on entry.item_id = item.item_id
     JOIN account ON entry.account_id = account.account_id
