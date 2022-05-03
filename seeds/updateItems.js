@@ -11,7 +11,7 @@
         {
           given_name: 'Pink',
           family_name: 'Ranger',
-          company: 'PowPow',
+          company: 'Collector1',
           nickname: 'pinky',
           email: 'pinky@powpow.com',
           account_type_id: 1,
@@ -20,7 +20,7 @@
         {
           given_name: 'Black',
           family_name: 'Ranger',
-          company: 'PowPow',
+          company: 'Collector2',
           nickname: 'blacky',
           email: 'blacky@powpow.com',
           account_type_id: 1,
@@ -167,6 +167,70 @@
     })
     .then(() => {
       return knex('entry').insert([
+        {
+          item_id: 1,
+          weight: 5.55,
+          created: '2022-03-27',
+          last_edit: '2022-03-28',
+          source_id: 1,
+          account_id: 2,
+        },
+        {
+          item_id: 2,
+          weight: 15.55,
+          created: '2022-03-28',
+          last_edit: '2022-03-29',
+          source_id: 1,
+          account_id: 2,
+        },
+        {
+          item_id: 3,
+          weight: 34.55,
+          created: '2022-03-28',
+          last_edit: '2022-03-29',
+          source_id: 1,
+          account_id: 2,
+        },
+        {
+          item_id: 2,
+          weight: 15.55,
+          created: '2022-04-28',
+          last_edit: '2022-04-29',
+          source_id: 1,
+          account_id: 1,
+        },
+        {
+          item_id: 3,
+          weight: 34.55,
+          created: '2022-04-28',
+          last_edit: '2022-04-29',
+          source_id: 1,
+          account_id: 1,
+        },
+        {
+          item_id: 4,
+          weight: 50,
+          created: '2022-01-31',
+          last_edit: '2022-01-31',
+          source_id: 2,
+          account_id: 1,
+        },
+        {
+          item_id: 5,
+          weight: 20,
+          created: '2022-02-01',
+          last_edit: '2022-02-01',
+          source_id: 3,
+          account_id: 2,
+        },
+        {
+          item_id: 4,
+          weight: 20,
+          created: '2022-04-01',
+          last_edit: '2022-04-01',
+          source_id: 4,
+          account_id: 3,
+        },
         {
           item_id: 1,
           weight: 5.55,
