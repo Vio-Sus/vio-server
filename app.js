@@ -92,6 +92,50 @@ module.exports = function (database) {
     }
   });
 
+  app.put('/api/updateProfile', async (req, res) => {
+    const theData = req.body.data;
+    const firstname = req.body.firstname;
+    const lastname = req.body.lastname;
+    const email = req.body.email;
+    const company = req.body.company;
+
+    const authId = req.oidc?.user?.sub;
+    const user = await database.findAccount(authId);
+    
+    res.send(JSON.stringify(req.body))
+    console.log('POST DATA: '+ JSON.stringify(req.body));
+    try {
+      let result = await database.updateAccountDetails(
+      firstname,
+      lastname,
+      email,
+      company,
+      user
+      );
+      res.send({
+        msg: 'account_type_details has been updated',
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ error });
+    }
+  });
+
+  // try {
+  //   let result = await database.getSource(authId);
+  //   console.log(result)
+  //   const data = await database.getSourceIdFromEmail(result.email)
+  //   console.log(data.source_id)
+  //   if(result && result.account_type_id === 2) { //needs to be changed to 2 after migrating
+  //     let result = await database.getSourceCollectorsByDateRange(
+  //       startDate,
+  //       endDate,
+  //       data.source_id
+  //     );
+  //     console.log('resuuuuuuult entires dates ', result);
+  //     res.send(result);
+  //   }
+
   /** Source Routes **/
   // getting all the sources associated with the logged in user
 
