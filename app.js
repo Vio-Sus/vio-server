@@ -432,6 +432,28 @@ module.exports = function (database) {
     }
   );
 
+  app.get('/api/sourceGraph/line/:startDate/:endDate', checkAuth, async (req, res) => {
+    const authId = req.oidc?.user?.sub;
+    const startDate = req.params.startDate;
+    const endDate = req.params.endDate;
+
+    let dataset = {};
+    try {
+      let user = await database.getSource(authId);
+      console.log('User: ', user);
+      const { sourceId } = await database.getSourceIdFromEmail(user.email);
+      console.log('Source ID: ', sourceId);
+      if(user && user.account_type_id === 2) {
+        let result = await database.getSourceGraphDataset(startDate, endDate, sourceId);
+        console.log('Source Graph Dataset: ', result);
+        res.send(result);
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ error })
+    }
+  });
+
   /** Render pages **/
   // anything that hasn't been serverd through a route should be served by the react app
   // /idk/someroute/longroute
