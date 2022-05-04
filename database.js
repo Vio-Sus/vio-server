@@ -143,13 +143,13 @@ module.exports = async function () {
 
   // get list of cx connected sources
   async function getSources(authId) {
-    console.log('AAAAAUTH ', authId);
+    //console.log('AAAAAUTH ', authId);
     const sqlQuery = `SELECT cx_source.source_id, name, address, phone_number, source.email FROM cx_source
     JOIN source ON cx_source.source_id = source.source_id
     JOIN account ON cx_source.cx_account_id = account.account_id
     WHERE account.auth0_id = $1;`;
     const result = await client.query(sqlQuery, [authId]);
-
+    
     return result.rows;
   }
 

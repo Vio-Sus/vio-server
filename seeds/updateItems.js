@@ -123,7 +123,7 @@
         {
           name: 'Cafe 3',
           address: '889 whatever street, van, bc',
-          phone_number: null,
+          phone_number: 1234566666,
           account_id: 1,
           email: 'cafe3@gmail.com'
         },
@@ -144,7 +144,7 @@
         {
           name: 'Coffee Shop 3',
           address: '789 whatever street, van, bc',
-          phone_number: null,
+          phone_number: 1234567890,
           account_id: 3,
           email: 'cafe6@gmail.com'
         },
@@ -154,9 +154,9 @@
       return knex('cx_source').insert([
         { source_id: 1, cx_account_id: 1 },
         { source_id: 2, cx_account_id: 1 },
+        { source_id: 4, cx_account_id: 2 },
         { source_id: 3, cx_account_id: 2 },
-
-        { source_id: 3, cx_account_id: 2 },
+        { source_id: 2, cx_account_id: 2 },
         { source_id: 1, cx_account_id: 2 },
         { source_id: 4, cx_account_id: 3 },
         { source_id: 5, cx_account_id: 3 },

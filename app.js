@@ -122,9 +122,9 @@ module.exports = function (database) {
     //change 1 to account id after we can log in
     const authId = req.oidc?.user?.sub;
     try {
-      let result = await database.getSources(authId);
+      const result = await database.getSources(authId);
       // await database.addEntries(entries, accountId);
-      console.log('resuuuuuuult', result);
+      console.log('result - ', result);
       res.send(result);
     } catch (error) {
       console.error(error);
