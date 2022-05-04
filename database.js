@@ -77,15 +77,10 @@ module.exports = async function () {
     return result;
   }
 
-  async function updateAccountDetails(firstname, lastname, email, company, accountId) {
-    let sqlQuery = 
-    // `UPDATE account SET account_type_id = $1
-    // WHERE account_id = $2`;
-
-    `UPDATE account SET given_name = $1, family_name = $2, email = $3, company = $4
-    WHERE account_id = $5`;
-
-    let params = [firstname, lastname, email, company, accountId.account_id];
+  async function updateAccountDetails(nickname, email, company, accountId) {
+    let sqlQuery = `UPDATE account SET nickname = $1, email = $2, company = $3
+    WHERE account_id = $4`;
+    let params = [nickname, email, company, accountId.account_id];
     console.log('params postdata: ' + params);
     const result = await client.query(sqlQuery, params);
     console.log('PARAMS: ' + params);
@@ -258,7 +253,7 @@ module.exports = async function () {
       WHERE account.auth0_id = $1;`;
     //   WHERE account_item.account_id = $1;`;
     // client.query(sqlQuery, [accountId], (err, result) => {
-    const result = await client.query(sqlQuery, [authId]);
+    const result = await client.query(sqlQuery, [authId]);   
     return result.rows;
   }
 
@@ -336,6 +331,14 @@ module.exports = async function () {
     AND created BETWEEN $2 AND $3
     GROUP BY source.name, item.name;`;
 
+    //   let sqlQuery = `SELECT source.name AS source_name, json_object_agg(item.name, entry.weight) AS totals
+    //   FROM entry
+    //   JOIN item ON entry.item_id = item.item_id
+    //   JOIN source ON entry.source_id = source.source_id
+    //   JOIN account ON entry.account_id = account.account_id
+    //   WHERE account.auth0_id = $1
+    //   AND created BETWEEN $2 AND $3
+    // GROUP BY source.name;`;
     const result = await client.query(sqlQuery, [authId, startDate, endDate]);
 
     const newJson = transformTotalWeightsData(result.rows);
@@ -353,7 +356,7 @@ module.exports = async function () {
     JOIN account ON entry.account_id = account.account_id
     WHERE account.auth0_id = $1
 	  AND entry.created BETWEEN $2 AND $3
-	  GROUP BY source.source_id, source.name, item.item_id, item.name, date
+  	GROUP BY source.source_id, source.name, item.item_id, item.name, date
     ORDER by date asc;`;
 
     const result = await client.query(sqlQuery, [authId, startDate, endDate]);

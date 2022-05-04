@@ -9,7 +9,6 @@ const jwt_decode = require('jwt-decode');
 const authConfig = require('./auth');
 const { generateDataset, filterEntriesBySource } = require('./chartHelpers');
 const { json } = require('body-parser');
-const { start } = require('repl');
 
 module.exports = function (database) {
   const app = express();
@@ -74,13 +73,12 @@ module.exports = function (database) {
   });
 
   /** Change account type **/
-  app.put('/api/profile/', async (req, res) => {
+  app.put('/api/profile/', async (req, res) => {             
     const theData = req.body.data;
     const authId = req.oidc?.user?.sub;
-    const user = await database.findAccount(authId);
-    let s = JSON.stringify(theData);
-    let postData = parseInt(s[30]);
-    console.log('POST DATA: ' + JSON.stringify(postData));
+    const user = await database.findAccount(authId);    
+    let s = JSON.stringify(theData);   
+    let postData = parseInt(s[30])          
     try {
       await database.updateAccountType(postData, user);
       res.send({
@@ -92,28 +90,25 @@ module.exports = function (database) {
     }
   });
 
-  app.put('/api/updateProfile', async (req, res) => {
+  //Update Account Details
+  app.put('/api/profileCollector', async (req, res) => {
     const theData = req.body.data;
-    const firstname = req.body.firstname;
-    const lastname = req.body.lastname;
-    const email = req.body.email;
-    const company = req.body.company;
-
+    const nickname = theData.nickname;   
+    const email = theData.email;
+    const company = theData.company;   
     const authId = req.oidc?.user?.sub;
-    const user = await database.findAccount(authId);
-    
-    res.send(JSON.stringify(req.body))
-    console.log('POST DATA: '+ JSON.stringify(req.body));
+    const user = await database.findAccount(authId);    
+    //res.send(JSON.stringify(req.body))
+    console.log('POST DATA: '+ nickname, email, company);
     try {
-      let result = await database.updateAccountDetails(
-      firstname,
-      lastname,
+      await database.updateAccountDetails(
+      nickname,
       email,
       company,
       user
       );
       res.send({
-        msg: 'account_type_details has been updated',
+        msg: 'account_details has been updated',
       });
     } catch (error) {
       console.error(error);
@@ -121,33 +116,15 @@ module.exports = function (database) {
     }
   });
 
-  // try {
-  //   let result = await database.getSource(authId);
-  //   console.log(result)
-  //   const data = await database.getSourceIdFromEmail(result.email)
-  //   console.log(data.source_id)
-  //   if(result && result.account_type_id === 2) { //needs to be changed to 2 after migrating
-  //     let result = await database.getSourceCollectorsByDateRange(
-  //       startDate,
-  //       endDate,
-  //       data.source_id
-  //     );
-  //     console.log('resuuuuuuult entires dates ', result);
-  //     res.send(result);
-  //   }
-
   /** Source Routes **/
   // getting all the sources associated with the logged in user
-
   app.get('/api/sources', checkAuth, async (req, res) => {
     //change 1 to account id after we can log in
-
     const authId = req.oidc?.user?.sub;
-
     try {
       let result = await database.getSources(authId);
       // await database.addEntries(entries, accountId);
-      //console.log('resuuuuuuult', result);
+      console.log('resuuuuuuult', result);
       res.send(result);
     } catch (error) {
       console.error(error);
@@ -155,119 +132,21 @@ module.exports = function (database) {
     }
   });
 
-  // get collectors from source
-  app.get('/api/sourceCollectors', checkAuth, async (req, res) => {
-
-    const authId = req.oidc?.user?.sub;
-
-    try {
-      let result = await database.getSource(authId);
-      console.log(result)
-      if(result && result.account_type_id === 2) { //needs to be changed to 2 after migrating
-        const data = await database.getSourceIdFromEmail(result.email)
-        console.log(data)
-        const sourceCollectors = await  database.getSourceCollectors(data.source_id)
-        //console.log(sourceCollectors)
-        res.send(sourceCollectors);
-      }
-    } catch (error) {
-      console.error(error);
-      res.status(500).send({ error });
-    }
-  });
-
-  // get collectors from source
-  app.get('/api/sourceCollectors/:startDate/:endDate',checkAuth, async (req, res) => {
-    //change 1 to account id after we can log in
-
-    const authId = req.oidc?.user?.sub;
-    const startDate = req.params.startDate;
-    const endDate = req.params.endDate;
-
-    try {
-      let result = await database.getSource(authId);
-      console.log(result)
-      const data = await database.getSourceIdFromEmail(result.email)
-      console.log(data.source_id)
-      if(result && result.account_type_id === 2) { //needs to be changed to 2 after migrating
-        let result = await database.getSourceCollectorsByDateRange(
-          startDate,
-          endDate,
-          data.source_id
-        );
-        console.log('resuuuuuuult entires dates ', result);
-        res.send(result);
-      }
-    } catch (error) {
-      console.error(error);
-      res.status(500).send({ error });
-    }
-  });
-
-  // Check for duplicate phone numbers
-  app.post('/api/sources/check-phone', async (req, res) => {
-    try {
-      const sqlObj = await database.checkSourcePhone(req.body.phoneNumber);
-      res.send(sqlObj);
-    } catch (err) {
-      console.log(err);
-    }
-  });
-
-  // Check for duplicate emails
-  app.post('/api/sources/check-email', async (req, res) => {
-    try {
-      const sqlObj = await database.checkSourceEmail(req.body.email);
-      res.send(sqlObj);
-    } catch (err) {
-      console.log(err);
-    }
-  });
-
   // post request to add a new source to this Cx account
-  app.post('/api/sources', checkAuth, async (req, res) => {
+  app.post('/api/sources', async (req, res) => {
     const authId = req.oidc?.user?.sub;
     const newSource = req.body.data;
     console.log('newSource: ', newSource);
     try {
       const account = await database.findAccount(authId);
-      let sources = await database.getAllSources();
-      let foundSource = sources.find((item) => item.email == newSource.email);
-      console.log(sources);
-      console.log(foundSource);
-      // check the source in the source table
-      if (foundSource) {
-        // check the source in the cx_source table
-        let sourcesOfCollectors = await database.getSources(authId);
-        let foundSourceOfCollectors = sourcesOfCollectors.find(
-          (item) => item.source_id == foundSource.source_id
-        );
-        if (foundSourceOfCollectors) {
-          res.send({error: "Source already exists; Try again"});
-        } else {
-          let test = await database.addSourceOfCollector(
-            foundSource.source_id,
-            account.account_id
-          );
-          console.log(test);
-          res.send({
-            msg: 'New source of this collector added successfully',
-          });
-        }
-      } else {
-        let source = await database.addNewSource(newSource);
-        //  console.log('sourceTest: '+ JSON.stringify(sourceTest));
-        await database.addSourceOfCollector(
-          source.source_id,
-          account.account_id
-        );
-        res.send({
-          msg: 'New source of this collector added successfully',
-        });
-      }
+      console.log('ACCCOCUNT ID', account);
+      await database.addSource(newSource, account.account_id);
+      res.send({
+        msg: 'New source added successfully',
+      });
     } catch (error) {
-      console.error('error.detail: ' + error.detail);
-      res.status(500).send(error.detail);
+      console.error(error);
+      res.status(500).send({ error });
     }
   });
 
@@ -289,7 +168,6 @@ module.exports = function (database) {
   // get the list of items associated with this account
   app.get('/api/items', checkAuth, async (req, res) => {
     const authId = req.oidc?.user?.sub;
-
     try {
       let result = await database.getItems(authId);
       console.log('resuuuuuuult items ', result);
@@ -328,7 +206,7 @@ module.exports = function (database) {
         msg: 'New Item added successfully',
       });
     } catch (error) {
-      console.error(error.detail);
+      console.error(error);
       res.status(500).send({ error });
     }
   });
@@ -447,8 +325,7 @@ module.exports = function (database) {
   /** Graph routes **/
   app.get(
     '/api/graph/line/:startDate/:endDate',
-    checkAuth,
-    async (req, res) => {
+    checkAuth, async (req, res) => {
       console.log('get graph routes is called :)');
       const authId = req.oidc?.user?.sub;
       // const authId = 'auth0|62070daf94fb2700687ca3b3'; // pinky
