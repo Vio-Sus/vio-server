@@ -102,6 +102,18 @@
           name: 'Plastic Lids',
           account_id: 3,
         },
+        {
+          name: 'Garbage',
+          account_id: 1,
+        },
+        {
+          name: 'Garbage',
+          account_id: 2,
+        },
+        {
+          name: 'Garbage',
+          account_id: 3,
+        },
       ]);
     })
     .then(() => {
@@ -170,7 +182,55 @@
         {
           item_id: 1,
           weight: 5.55,
+          created: '2020-03-27',
+          last_edit: '2022-03-28',
+          source_id: 1,
+          account_id: 2,
+        },
+        {
+          item_id: 10,
+          weight: 15.23,
           created: '2022-03-27',
+          last_edit: '2022-03-28',
+          source_id: 1,
+          account_id: 2,
+        },
+        {
+          item_id: 10,
+          weight: 24.23,
+          created: '2022-02-27',
+          last_edit: '2022-03-28',
+          source_id: 1,
+          account_id: 2,
+        },
+        {
+          item_id: 10,
+          weight: 14.23,
+          created: '2022-01-27',
+          last_edit: '2022-03-28',
+          source_id: 1,
+          account_id: 2,
+        },
+        {
+          item_id: 10,
+          weight: 74.63,
+          created: '2022-01-27',
+          last_edit: '2022-03-28',
+          source_id: 1,
+          account_id: 2,
+        },
+        {
+          item_id: 10,
+          weight: 54.28,
+          created: '2022-04-27',
+          last_edit: '2022-03-28',
+          source_id: 1,
+          account_id: 2,
+        },
+        {
+          item_id: 10,
+          weight: 14.23,
+          created: '2022-04-27',
           last_edit: '2022-03-28',
           source_id: 1,
           account_id: 2,
@@ -259,7 +319,7 @@
           item_id: 4,
           weight: 50,
           created: '2022-01-31',
-          last_edit: '2022-01-31',
+          last_edit: '2022-02-15',
           source_id: 2,
           account_id: 1,
         },
