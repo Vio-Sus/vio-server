@@ -190,6 +190,22 @@
         {
           item_id: 10,
           weight: 15.23,
+          created: '2022-04-2',
+          last_edit: '2022-03-28',
+          source_id: 1,
+          account_id: 2,
+        },
+        {
+          item_id: 10,
+          weight: 15.23,
+          created: '2022-04-10',
+          last_edit: '2022-03-28',
+          source_id: 1,
+          account_id: 2,
+        },
+        {
+          item_id: 10,
+          weight: 15.23,
           created: '2022-03-27',
           last_edit: '2022-03-28',
           source_id: 1,
