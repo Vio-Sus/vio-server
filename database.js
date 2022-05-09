@@ -77,6 +77,17 @@ module.exports = async function () {
     return result;
   }
 
+  async function updateAccountDetails(nickname, email, company, accountId) {
+    let sqlQuery = `UPDATE account SET nickname = $1, email = $2, company = $3
+    WHERE account_id = $4`;
+    let params = [nickname, email, company, accountId.account_id];
+    console.log('params postdata: ' + params);
+    const result = await client.query(sqlQuery, params);
+    console.log('PARAMS: ' + params);
+    console.log('UPDATED ACCOUNT TYPE: ' + result);
+    return result;
+  }
+
   async function updateSource(sourceId, postData) {
     let sqlQuery = `UPDATE source SET name = $1, address = $2, phone_number = $3, email = $4
       WHERE source_id = $5`;
@@ -132,13 +143,13 @@ module.exports = async function () {
 
   // get list of cx connected sources
   async function getSources(authId) {
-    console.log('AAAAAUTH ', authId);
+    //console.log('AAAAAUTH ', authId);
     const sqlQuery = `SELECT cx_source.source_id, name, address, phone_number, source.email FROM cx_source
     JOIN source ON cx_source.source_id = source.source_id
     JOIN account ON cx_source.cx_account_id = account.account_id
     WHERE account.auth0_id = $1;`;
     const result = await client.query(sqlQuery, [authId]);
-
+    
     return result.rows;
   }
 
@@ -242,7 +253,7 @@ module.exports = async function () {
       WHERE account.auth0_id = $1;`;
     //   WHERE account_item.account_id = $1;`;
     // client.query(sqlQuery, [accountId], (err, result) => {
-    const result = await client.query(sqlQuery, [authId]);
+    const result = await client.query(sqlQuery, [authId]);   
     return result.rows;
   }
 
@@ -345,7 +356,7 @@ module.exports = async function () {
     JOIN account ON entry.account_id = account.account_id
     WHERE account.auth0_id = $1
 	  AND entry.created BETWEEN $2 AND $3
-	  GROUP BY source.source_id, source.name, item.item_id, item.name, date
+  	GROUP BY source.source_id, source.name, item.item_id, item.name, date
     ORDER by date asc;`;
 
     const result = await client.query(sqlQuery, [authId, startDate, endDate]);
@@ -446,6 +457,7 @@ module.exports = async function () {
     findAccount,
     addAccount,
     updateAccountType,
+    updateAccountDetails,
     updateSource,
     updateItem,
     addItem,

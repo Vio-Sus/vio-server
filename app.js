@@ -9,7 +9,6 @@ const jwt_decode = require('jwt-decode');
 const authConfig = require('./auth');
 const { generateDataset, filterEntriesBySource } = require('./chartHelpers');
 const { json } = require('body-parser');
-const { start } = require('repl');
 
 module.exports = function (database) {
   const app = express();
@@ -74,13 +73,12 @@ module.exports = function (database) {
   });
 
   /** Change account type **/
-  app.put('/api/profile/', async (req, res) => {
+  app.put('/api/profile/', async (req, res) => {             
     const theData = req.body.data;
     const authId = req.oidc?.user?.sub;
-    const user = await database.findAccount(authId);
-    let s = JSON.stringify(theData);
-    let postData = parseInt(s[30]);
-    console.log('POST DATA: ' + JSON.stringify(postData));
+    const user = await database.findAccount(authId);    
+    let s = JSON.stringify(theData);   
+    let postData = parseInt(s[30])          
     try {
       await database.updateAccountType(postData, user);
       res.send({
@@ -92,24 +90,48 @@ module.exports = function (database) {
     }
   });
 
+  //Update Account Details
+  app.put('/api/profileCollector', async (req, res) => {
+    const theData = req.body.data;
+    const nickname = theData.nickname;   
+    const email = theData.email;
+    const company = theData.company;   
+    const authId = req.oidc?.user?.sub;
+    const user = await database.findAccount(authId);    
+    //res.send(JSON.stringify(req.body))
+    console.log('POST DATA: '+ nickname, email, company);
+    try {
+      await database.updateAccountDetails(
+      nickname,
+      email,
+      company,
+      user
+      );
+      res.send({
+        msg: 'account_details has been updated',
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ error });
+    }
+  });
+
   /** Source Routes **/
   // getting all the sources associated with the logged in user
-
   app.get('/api/sources', checkAuth, async (req, res) => {
     //change 1 to account id after we can log in
-
     const authId = req.oidc?.user?.sub;
-
     try {
-      let result = await database.getSources(authId);
+      const result = await database.getSources(authId);
       // await database.addEntries(entries, accountId);
-      //console.log('resuuuuuuult', result);
+      console.log('result - ', result);
       res.send(result);
     } catch (error) {
       console.error(error);
       res.status(500).send({ error });
     }
   });
+
 
   // get collectors from source
   app.get('/api/sourceCollectors', checkAuth, async (req, res) => {
@@ -122,8 +144,8 @@ module.exports = function (database) {
       if(result && result.account_type_id === 2) { //needs to be changed to 2 after migrating
         const data = await database.getSourceIdFromEmail(result.email)
         console.log(data)
-        const sourceCollectors = await  database.getSourceCollectors(data.source_id)
-        //console.log(sourceCollectors)
+        const sourceCollectors = await database.getSourceCollectors(data.source_id)
+        // console.log("collectors " + sourceCollectors)
         res.send(sourceCollectors);
       }
     } catch (error) {
@@ -180,8 +202,10 @@ module.exports = function (database) {
     }
   });
 
+
   // post request to add a new source to this Cx account
-  app.post('/api/sources', checkAuth, async (req, res) => {
+   // post request to add a new source to this Cx account
+   app.post('/api/sources', checkAuth, async (req, res) => {
     const authId = req.oidc?.user?.sub;
     const newSource = req.body.data;
     console.log('newSource: ', newSource);
@@ -245,7 +269,6 @@ module.exports = function (database) {
   // get the list of items associated with this account
   app.get('/api/items', checkAuth, async (req, res) => {
     const authId = req.oidc?.user?.sub;
-
     try {
       let result = await database.getItems(authId);
       console.log('resuuuuuuult items ', result);
@@ -284,7 +307,7 @@ module.exports = function (database) {
         msg: 'New Item added successfully',
       });
     } catch (error) {
-      console.error(error.detail);
+      console.error(error);
       res.status(500).send({ error });
     }
   });
@@ -403,8 +426,7 @@ module.exports = function (database) {
   /** Graph routes **/
   app.get(
     '/api/graph/line/:startDate/:endDate',
-    checkAuth,
-    async (req, res) => {
+    checkAuth, async (req, res) => {
       console.log('get graph routes is called :)');
       const authId = req.oidc?.user?.sub;
       // const authId = 'auth0|62070daf94fb2700687ca3b3'; // pinky
