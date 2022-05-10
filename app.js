@@ -7,7 +7,7 @@ const { auth } = require('express-openid-connect');
 const jwt_decode = require('jwt-decode');
 
 const authConfig = require('./auth');
-const { generateDataset, filterEntriesBySource } = require('./chartHelpers');
+const { generateDataset, filterEntriesBySource, filterEntriesByCollector } = require('./chartHelpers');
 const { json } = require('body-parser');
 
 module.exports = function (database) {
@@ -463,12 +463,18 @@ module.exports = function (database) {
     try {
       let user = await database.getSource(authId);
       console.log('User: ', user);
-      const { sourceId } = await database.getSourceIdFromEmail(user.email);
-      console.log('Source ID: ', sourceId);
+      const { source_id } = await database.getSourceIdFromEmail(user.email);
       if(user && user.account_type_id === 2) {
-        let result = await database.getSourceGraphDataset(startDate, endDate, sourceId);
-        console.log('Source Graph Dataset: ', result);
-        res.send(result);
+        let result = await database.getSourceGraphDataset(startDate, endDate, source_id);
+        let sorted = filterEntriesByCollector(result)
+
+        // for each sorted key value
+        for (const collector in sorted) {
+          let structuredData = generateDataset(sorted[collector], startDate, endDate);
+          dataset[collector] = structuredData;
+        }
+
+        res.send(dataset);
       }
     } catch (error) {
       console.error(error);

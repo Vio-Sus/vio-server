@@ -164,7 +164,7 @@ const filterEntriesBySource = (input) => {
       sources[entry.sourceName] = [
         ...sources[entry.sourceName],
         {
-          itemName: entry.itemName,
+          itemName: entry.itemName, // item_name
           date: entry.date,
           totalWeight: entry.totalWeight,
         },
@@ -185,4 +185,35 @@ const filterEntriesBySource = (input) => {
   return sources;
 };
 
-module.exports = { generateDataset, filterEntriesBySource };
+filterEntriesByCollector = (input) => {
+  let collectors = {};
+
+  input.forEach((entry) => {
+    let collector = Object.keys(collectors);
+
+    let found = collector.find((key) => key === entry.collectorName);
+
+    if (found) {
+      collectors[entry.collectorName] = [
+        ...collectors[entry.collectorName],
+        {
+          itemName: entry.itemName,
+          date: entry.date,
+          totalWeight: entry.totalWeight,
+        },
+      ];
+    } else {
+      collectors[entry.collectorName] = [
+        {
+          itemName: entry.itemName,
+          date: entry.date,
+          totalWeight: entry.totalWeight,
+        },
+      ];
+    }
+  });
+  console.log('COLLECTORS (from chartHelpers): ', collectors);
+  return collectors;
+}
+
+module.exports = { generateDataset, filterEntriesBySource, filterEntriesByCollector };

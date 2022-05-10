@@ -369,7 +369,7 @@ module.exports = async function () {
   async function getSourceGraphDataset(startDate, endDate, sourceId) {
     let sqlQuery = `
     SELECT account.account_id, account.company AS collector_name, item.name AS item_name, 
-    TO_CHAR(created :: DATE, 'yyyy-mm-dd) AS date, SUM(weight) AS total_weight FROM entry
+    TO_CHAR(created :: DATE, 'yyyy-mm-dd') AS date, SUM(weight) AS total_weight FROM entry
     JOIN item on entry.item_id = item.item_id
     JOIN account ON entry.account_id = account.account_id
     WHERE source_id = $1
@@ -379,7 +379,6 @@ module.exports = async function () {
     `;
 
     const result = await client.query(sqlQuery, [sourceId, startDate, endDate]);
-
     const camelResult = result.rows.map((row) => keysToCamel(row));
 
     return camelResult;
