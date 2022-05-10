@@ -7,7 +7,7 @@ const { auth } = require('express-openid-connect');
 const jwt_decode = require('jwt-decode');
 
 const authConfig = require('./auth');
-const { generateDataset, filterEntriesBySource } = require('./chartHelpers');
+const { generateDataset, filterEntriesBySource, filterEntriesByCollector } = require('./chartHelpers');
 const { json } = require('body-parser');
 
 module.exports = function (database) {
@@ -453,6 +453,34 @@ module.exports = function (database) {
       }
     }
   );
+
+  app.get('/api/sourceGraph/line/:startDate/:endDate', checkAuth, async (req, res) => {
+    const authId = req.oidc?.user?.sub;
+    const startDate = req.params.startDate;
+    const endDate = req.params.endDate;
+
+    let dataset = {};
+    try {
+      let user = await database.getSource(authId);
+      console.log('User: ', user);
+      const { source_id } = await database.getSourceIdFromEmail(user.email);
+      if(user && user.account_type_id === 2) {
+        let result = await database.getSourceGraphDataset(startDate, endDate, source_id);
+        let sorted = filterEntriesByCollector(result)
+
+        // for each sorted key value
+        for (const collector in sorted) {
+          let structuredData = generateDataset(sorted[collector], startDate, endDate);
+          dataset[collector] = structuredData;
+        }
+        console.log('dataset from sourcegraph API call: ', dataset)
+        res.send(dataset);
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ error })
+    }
+  });
 
   /** Render pages **/
   // anything that hasn't been serverd through a route should be served by the react app

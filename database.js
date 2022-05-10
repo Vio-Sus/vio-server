@@ -366,6 +366,24 @@ module.exports = async function () {
     return camelResult;
   }
 
+  async function getSourceGraphDataset(startDate, endDate, sourceId) {
+    let sqlQuery = `
+    SELECT account.account_id, account.company AS collector_name, item.name AS item_name, 
+    TO_CHAR(created :: DATE, 'yyyy-mm-dd') AS date, SUM(weight) AS total_weight FROM entry
+    JOIN item on entry.item_id = item.item_id
+    JOIN account ON entry.account_id = account.account_id
+    WHERE source_id = $1
+    AND entry.created BETWEEN $2 AND $3
+    GROUP BY account.account_id, account.company, item.item_id, item.name, date
+    ORDER by date asc;
+    `;
+
+    const result = await client.query(sqlQuery, [sourceId, startDate, endDate]);
+    const camelResult = result.rows.map((row) => keysToCamel(row));
+
+    return camelResult;
+  }
+
   async function getEntryById(entryId) {
     let sqlQuery = `SELECT item.name AS item_name, item.item_id,
     source.name AS source_name, source.source_id, entry_id,
@@ -427,6 +445,7 @@ module.exports = async function () {
     getSourceCollectors,
     getSourceCollectorsByDateRange,
     getSourceIdFromEmail,
+    getSourceGraphDataset,
     getItems,
     getEntriesByDateRange,
     getListOfEntries,
