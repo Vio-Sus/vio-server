@@ -473,7 +473,7 @@ module.exports = function (database) {
           let structuredData = generateDataset(sorted[collector], startDate, endDate);
           dataset[collector] = structuredData;
         }
-
+        console.log('dataset from sourcegraph API call: ', dataset)
         res.send(dataset);
       }
     } catch (error) {
