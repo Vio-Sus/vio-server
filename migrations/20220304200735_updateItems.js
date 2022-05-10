@@ -2,7 +2,7 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
- exports.up = function (knex) {
+exports.up = function (knex) {
   return Promise.all([
     knex.schema.createTable('account_type', function (t) {
       t.increments('account_type_id').primary();
