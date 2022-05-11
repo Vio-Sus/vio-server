@@ -108,15 +108,7 @@
         },
         {
           name: 'Garbage',
-          account_id: 1,
-        },
-        {
-          name: 'Garbage',
           account_id: 2,
-        },
-        {
-          name: 'Garbage',
-          account_id: 3,
         },
       ]);
     })
@@ -213,6 +205,14 @@
           weight: 15.23,
           created: '2021-04-2',
           last_edit: '2021-04-2',
+          source_id: 1,
+          account_id: 2,
+        },
+        {
+          item_id: 4,
+          weight: 65.23,
+          created: '2021-04-4',
+          last_edit: '2021-04-4',
           source_id: 1,
           account_id: 2,
         },
@@ -354,6 +354,14 @@
           account_id: 2,
         },
         {
+          item_id: 4,
+          weight: 65.23,
+          created: '2022-04-4',
+          last_edit: '2022-04-4',
+          source_id: 1,
+          account_id: 1,
+        },
+        {
           item_id: 10,
           weight: 54.28,
           created: '2022-05-01',
@@ -368,6 +376,14 @@
           last_edit: '2022-05-01',
           source_id: 1,
           account_id: 2,
+        },
+        {
+          item_id: 4,
+          weight: 65.23,
+          created: '2022-05-4',
+          last_edit: '2022-05-4',
+          source_id: 1,
+          account_id: 1,
         },
         {
           item_id: 2,
