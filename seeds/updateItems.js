@@ -332,8 +332,8 @@
         {
           item_id: 10,
           weight: 24.23,
-          created: '2022-05-27',
-          last_edit: '2022-05-28',
+          created: '2022-04-27',
+          last_edit: '2022-04-28',
           source_id: 1,
           account_id: 2,
         },
@@ -500,8 +500,8 @@
         {
           item_id: 4,
           weight: 50,
-          created: '2022-05-10',
-          last_edit: '2022-05-10',
+          created: '2022-05-9',
+          last_edit: '2022-05-9',
           source_id: 2,
           account_id: 1,
         },
