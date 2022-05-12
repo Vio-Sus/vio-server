@@ -21,7 +21,7 @@
           given_name: 'Black',
           family_name: 'Ranger',
           company: 'Collector2',
-          nickname: 'blacky',
+          nickname: 'Collector2',
           email: 'blacky@powpow.com',
           account_type_id: 1,
           auth0_id: 'auth0|620c57885e503e006996bdd3',
